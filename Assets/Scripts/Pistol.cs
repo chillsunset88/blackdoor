@@ -1,50 +1,51 @@
 using UnityEngine;
+using UnityEngine.XR.Interaction.Toolkit;
 
 public class Pistol : MonoBehaviour
 {
-    [Header("Bullet Settings")]
-    public GameObject bulletPrefab;
-    public Transform firePoint;
-    public float bulletSpeed = 20f;
-    public float bulletLifetime = 5f; // seconds before bullet is destroyed
+    [Header("Referensi Objek")]
+    public GameObject bulletPrefab;      // Masukkan prefab peluru di sini
+    public Transform spawnPoint;         // Tempat peluru muncul (ujung laras)
 
-    [Header("Audio")]
-    public AudioClip clip;
-    private AudioSource source;
+    [Header("Pengaturan Pistol")]
+    public float bulletSpeed = 20f;      // Kecepatan peluru
 
-    private void Start()
+    private UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable grabInteractable;
+
+    void Start()
     {
-        source = GetComponent<AudioSource>();
+        // Otomatis mengambil komponen XR Grab Interactable di objek ini
+        grabInteractable = GetComponent<UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable>();
+        
+        // Daftarkan fungsi Shoot agar aktif saat trigger controller ditekan
+        grabInteractable.activated.AddListener(Shoot);
+    }
 
-        if (source == null)
+    void OnDestroy()
+    {
+        // Bersihkan listener saat objek dihancurkan agar tidak error
+        if (grabInteractable != null)
         {
-            source = gameObject.AddComponent<AudioSource>();
+            grabInteractable.activated.RemoveListener(Shoot);
         }
     }
 
-    public void FireBullet()
+    // Fungsi untuk menembak
+    public void Shoot(ActivateEventArgs args)
     {
-        // Spawn bullet
-        GameObject bullet = Instantiate(
-            bulletPrefab,
-            firePoint.position,
-            firePoint.rotation
-        );
+        // 1. Buat/Spawn peluru di posisi dan rotasi spawnPoint
+        GameObject spawnedBullet = Instantiate(bulletPrefab, spawnPoint.position, spawnPoint.rotation);
 
-        // Apply velocity
-        Rigidbody rb = bullet.GetComponent<Rigidbody>();
+        // 2. Ambil komponen Rigidbody dari peluru untuk memberinya gaya/dorongan
+        Rigidbody rb = spawnedBullet.GetComponent<Rigidbody>();
+        
         if (rb != null)
         {
-            rb.linearVelocity = -firePoint.right * bulletSpeed;
+            // Dorong peluru ke arah depan laras pistol
+            rb.linearVelocity = spawnPoint.forward * bulletSpeed;
         }
 
-        // Play gun sound
-        if (clip != null && source != null)
-        {
-            source.PlayOneShot(clip);
-        }
-
-        // Destroy bullet after time
-        Destroy(bullet, bulletLifetime);
+        // 3. Hancurkan peluru otomatis setelah 3 detik agar game tidak lag
+        Destroy(spawnedBullet, 3f);
     }
 }
