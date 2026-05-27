@@ -4,48 +4,80 @@ using UnityEngine.XR.Interaction.Toolkit;
 public class Pistol : MonoBehaviour
 {
     [Header("Referensi Objek")]
-    public GameObject bulletPrefab;      // Masukkan prefab peluru di sini
-    public Transform spawnPoint;         // Tempat peluru muncul (ujung laras)
+    public GameObject bulletPrefab;      
+    public Transform spawnPoint;         
 
     [Header("Pengaturan Pistol")]
-    public float bulletSpeed = 20f;      // Kecepatan peluru
+    public float bulletSpeed = 101f;      
+    
+    [Header("Sistem Amunisi")]
+    public int maxAmmo = 7;             // Kapasitas maksimal peluru dalam 1 magasin
+    private int currentAmmo;            // Sisa peluru saat ini
 
     private UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable grabInteractable;
+    private AudioSource audioSource; 
 
     void Start()
     {
-        // Otomatis mengambil komponen XR Grab Interactable di objek ini
         grabInteractable = GetComponent<UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable>();
+        audioSource = GetComponent<AudioSource>();
         
-        // Daftarkan fungsi Shoot agar aktif saat trigger controller ditekan
+        // Mengisi peluru penuh saat game pertama kali dimulai
+        currentAmmo = maxAmmo;
+
         grabInteractable.activated.AddListener(Shoot);
     }
 
     void OnDestroy()
     {
-        // Bersihkan listener saat objek dihancurkan agar tidak error
         if (grabInteractable != null)
         {
             grabInteractable.activated.RemoveListener(Shoot);
         }
     }
 
-    // Fungsi untuk menembak
     public void Shoot(ActivateEventArgs args)
     {
-        // 1. Buat/Spawn peluru di posisi dan rotasi spawnPoint
-        GameObject spawnedBullet = Instantiate(bulletPrefab, spawnPoint.position, spawnPoint.rotation);
+        // Jika peluru habis, pistol mogok tidak bisa menembak
+        if (currentAmmo <= 0)
+        {
+            Debug.Log("Peluru Habis! Masukkan magasin ke socket untuk reload.");
+            return;
+        }
 
-        // 2. Ambil komponen Rigidbody dari peluru untuk memberinya gaya/dorongan
+        // Jalankan tembakan jika peluru masih ada
+        GameObject spawnedBullet = Instantiate(bulletPrefab, spawnPoint.position, spawnPoint.rotation);
         Rigidbody rb = spawnedBullet.GetComponent<Rigidbody>();
         
         if (rb != null)
         {
-            // Dorong peluru ke arah depan laras pistol
             rb.linearVelocity = spawnPoint.forward * bulletSpeed;
         }
 
-        // 3. Hancurkan peluru otomatis setelah 3 detik agar game tidak lag
         Destroy(spawnedBullet, 3f);
+
+        if (audioSource != null && audioSource.clip != null)
+        {
+            audioSource.Play();
+        }
+
+        // Kurangi peluru setiap kali sukses menembak
+        currentAmmo--;
+        Debug.Log("Sisa Peluru: " + currentAmmo);
+    }
+
+    // ==========================================================
+    // FUNGSI UTAMA UNTUK DI-ASSIGN KE SOCKET (MUST BE PUBLIC)
+    // ==========================================================
+    public void ReloadPistol(SelectEnterEventArgs args)
+    {
+        currentAmmo = maxAmmo;
+        Debug.Log("Reload Berhasil! Peluru kembali penuh: " + currentAmmo);
+
+        // Menghancurkan objek magasin yang masuk ke dalam socket agar terlihat realistis tertelan pistol
+        if (args.interactableObject != null)
+        {
+            Destroy(args.interactableObject.transform.gameObject);
+        }
     }
 }
