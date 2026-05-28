@@ -1,18 +1,22 @@
 using UnityEngine;
-using UnityEngine.AI; // Wajib dimasukkan untuk mengontrol NavMesh
+using UnityEngine.AI;
 
 public class ZombieAI : MonoBehaviour
 {
     private NavMeshAgent agent;
     private Transform playerTransform;
+    private Animator anim;
+
+    public int health = 3;
+    private bool isDead = false;
 
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
+        anim = GetComponent<Animator>();
 
-        // Mencari objek XR Origin/Player secara otomatis di dalam map menggunakan Tag
         GameObject player = GameObject.FindGameObjectWithTag("Player");
-        
+
         if (player != null)
         {
             playerTransform = player.transform;
@@ -21,22 +25,53 @@ public class ZombieAI : MonoBehaviour
 
     void Update()
     {
-        // Jika pemain ditemukan, perintahkan NavMesh untuk terus berjalan ke posisi koordinat pemain
-        if (playerTransform != null && agent != null)
+        if (!isDead && playerTransform != null && agent != null)
         {
             agent.SetDestination(playerTransform.position);
         }
     }
 
-    // Fungsi tambahan jika zombie tertembak oleh peluru pistol kamu
-    private void OnCollisionEnter(Collision collision)
+    private void OnTriggerEnter(Collider other)
+{
+    Debug.Log("KENA SESUATU");
+
+    if (other.CompareTag("Bullet"))
     {
-        // Jika objek yang menabrak badan zombie memiliki tag "Bullet"
-        if (collision.gameObject.CompareTag("Bullet"))
+        Debug.Log("Zombie Tertembak!");
+
+        health--;
+
+        Destroy(other.gameObject);
+
+        if (health <= 0)
         {
-            Debug.Log("Zombie Tertembak!");
-            Destroy(collision.gameObject); // Hancurkan peluru
-            Destroy(gameObject);           // Hancurkan zombie (mati)
+            Die();
         }
+    }
+}
+
+    void Die()
+    {
+        isDead = true;
+
+        if (agent != null)
+        {
+            agent.isStopped = true;
+            agent.enabled = false;
+        }
+
+        Collider col = GetComponent<Collider>();
+
+        if (col != null)
+        {
+            col.enabled = false;
+        }
+
+        if (anim != null)
+        {
+            anim.Play("Z_FallingBack");
+        }
+
+        Destroy(gameObject, 3f);
     }
 }

@@ -8,7 +8,7 @@ public class Pistol : MonoBehaviour
     public Transform spawnPoint;         
 
     [Header("Pengaturan Pistol")]
-    public float bulletSpeed = 101f;      
+    public float bulletSpeed = 20f;      
     
     [Header("Sistem Amunisi")]
     public int maxAmmo = 7;             // Kapasitas maksimal peluru dalam 1 magasin
