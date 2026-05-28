@@ -1,77 +1,35 @@
 using UnityEngine;
-using UnityEngine.AI;
+using UnityEngine.AI; // Jika menggunakan NavMesh
 
 public class ZombieAI : MonoBehaviour
 {
     private NavMeshAgent agent;
-    private Transform playerTransform;
-    private Animator anim;
-
-    public int health = 3;
-    private bool isDead = false;
+    private Transform player;
+    
+    // Variabel pengontrol apakah zombie boleh jalan atau tidak
+    [HideInInspector]
+    public bool zombieAktif = false; 
 
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
-        anim = GetComponent<Animator>();
-
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-
-        if (player != null)
-        {
-            playerTransform = player.transform;
-        }
+        player = GameObject.FindGameObjectWithTag("Player").transform;
     }
 
     void Update()
     {
-        if (!isDead && playerTransform != null && agent != null)
+        // JIKA ZOMBIE BELUM AKTIF, JANGAN JALAN (BERHENTI DI SINI)
+        if (!zombieAktif)
         {
-            agent.SetDestination(playerTransform.position);
-        }
-    }
-
-    private void OnTriggerEnter(Collider other)
-{
-    Debug.Log("KENA SESUATU");
-
-    if (other.CompareTag("Bullet"))
-    {
-        Debug.Log("Zombie Tertembak!");
-
-        health--;
-
-        Destroy(other.gameObject);
-
-        if (health <= 0)
-        {
-            Die();
-        }
-    }
-}
-
-    void Die()
-    {
-        isDead = true;
-
-        if (agent != null)
-        {
-            agent.isStopped = true;
-            agent.enabled = false;
+            if(agent != null) agent.isStopped = true;
+            return;
         }
 
-        Collider col = GetComponent<Collider>();
-
-        if (col != null)
+        // Jika sudah aktif, zombie berjalan mengejar player
+        if (agent != null && player != null)
         {
-            col.enabled = false;
+            agent.isStopped = false;
+            agent.SetDestination(player.position);
         }
-
-        if (anim != null)
-        {
-            anim.Play("Z_FallingBack");
-        }
-
-        Destroy(gameObject, 3f);
     }
 }
