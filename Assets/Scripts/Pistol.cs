@@ -47,11 +47,24 @@ public class Pistol : MonoBehaviour
 
         // Jalankan tembakan jika peluru masih ada
         GameObject spawnedBullet = Instantiate(bulletPrefab, spawnPoint.position, spawnPoint.rotation);
+        Bullet bulletScript = spawnedBullet.GetComponent<Bullet>();
+        if (bulletScript == null)
+        {
+            Debug.LogWarning("Spawned bullet prefab does not contain Bullet.cs: " + spawnedBullet.name);
+        }
+        else
+        {
+            Debug.Log("Spawned bullet has Bullet script: " + spawnedBullet.name);
+        }
+
         Rigidbody rb = spawnedBullet.GetComponent<Rigidbody>();
-        
         if (rb != null)
         {
             rb.linearVelocity = spawnPoint.forward * bulletSpeed;
+        }
+        else
+        {
+            Debug.LogWarning("Spawned bullet prefab does not have Rigidbody: " + spawnedBullet.name);
         }
 
         Destroy(spawnedBullet, 3f);

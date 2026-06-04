@@ -3,75 +3,141 @@ using UnityEngine.AI;
 
 public class ZombieAI : MonoBehaviour
 {
+    [Header("Target Settings")]
+    public Transform playerTarget; // Drag objek Main Camera / Player kamu ke sini di Inspector
+    public string playerTag = "MainCamera"; // Alternatif jika target tidak di-drag, akan dicari lewat Tag
+
+    [Header("Zombie Settings")]
+    public float attackDistance = 1.5f; // Jarak minimal zombie untuk mulai menyerang player
+    public float stoppingDistance = 0.5f; // Jarak berhenti dari player
+    public float walkSpeed = 3.5f; // Kecepatan berjalan zombie
+    public bool zombieAktif = false; // Aktifkan zombie saat game dimulai
+
+    // Komponen internal
     private NavMeshAgent agent;
-    private Transform player;
-    private Animator anim; // Komponen pengontrol animasi
-    
-    [HideInInspector]
-    public bool zombieAktif = false; 
-    private bool sudahMati = false;
+    private Animator anim;
 
     void Start()
     {
+        // Mengambil komponen yang ada di tubuh zombie
         agent = GetComponent<NavMeshAgent>();
-        anim = GetComponent<Animator>(); // Ambil komponen Animator di tubuh zombie
+        anim = GetComponent<Animator>();
 
-        GameObject playerObjek = GameObject.FindGameObjectWithTag("Player");
-        if (playerObjek != null)
+        // Validasi NavMeshAgent
+        if (agent == null)
         {
-            player = playerObjek.transform; 
+            Debug.LogError("ZombieAI: NavMeshAgent tidak ditemukan! Tambahkan NavMeshAgent component ke Zombie gameobject.");
+        }
+        else
+        {
+            // Atur kecepatan berjalan zombie
+            agent.speed = walkSpeed;
+        }
+
+        if (anim == null)
+        {
+            Debug.LogWarning("ZombieAI: Animator tidak ditemukan pada Zombie!");
+        }
+
+        // Jika playerTarget kosong di Inspector, cari otomatis berdasarkan Tag
+        if (playerTarget == null)
+        {
+            GameObject playerObj = GameObject.FindWithTag(playerTag);
+            if (playerObj != null)
+            {
+                playerTarget = playerObj.transform;
+            }
+            else
+            {
+                Debug.LogWarning("ZombieAI: Objek dengan Tag '" + playerTag + "' tidak ditemukan di Scene!");
+            }
         }
     }
 
     void Update()
     {
-        if (sudahMati) return; // Jika sudah mati, stop semua logika di bawah
-
-        // JIKA GAME BELUM MULAI / ZOMBIE DIAM
+        // Hanya jalankan zombie jika sudah diaktifkan oleh GameManager
         if (!zombieAktif)
         {
-            if (agent != null && agent.isOnNavMesh) agent.isStopped = true;
-            
-            // Beritahu Animator untuk memainkan animasi IDLE (isWalking = false)
-            if (anim != null) anim.SetBool("isWalking", false);
+            StopZombie();
             return;
         }
 
-        // JIKA GAME SUDAH MULAI & ZOMBIE MENGEJAR PLAYER
-        if (agent != null && player != null && agent.isOnNavMesh)
+        // Jika NavMeshAgent tidak ada, skip
+        if (agent == null)
         {
-            agent.isStopped = false;
-            agent.SetDestination(player.position);
+            return;
+        }
 
-            // Beritahu Animator untuk memainkan animasi WALK (isWalking = true)
-            if (anim != null) anim.SetBool("isWalking", true);
+        // Jika tidak ada target player, zombie diam
+        if (playerTarget == null) 
+        {
+            StopZombie();
+            return;
+        }
+
+        // Hitung jarak antara zombie dan player
+        float distanceToPlayer = Vector3.Distance(transform.position, playerTarget.position);
+
+        if (distanceToPlayer <= attackDistance)
+        {
+            // KONDISI 1: Jarak dekat -> Berhenti jalan dan serang player
+            StopZombie();
+            TriggerAttack();
+        }
+        else
+        {
+            // KONDISI 2: Jarak jauh -> Kejar player
+            ChasePlayer();
         }
     }
 
-    private void OnCollisionEnter(Collision collision)
+    void ChasePlayer()
     {
-        if (sudahMati) return;
-
-        if (collision.gameObject.CompareTag("Bullet") || collision.gameObject.name.Contains("Bullet"))
+        if (agent == null || !agent.enabled || !agent.isOnNavMesh)
         {
-            Mati(collision.gameObject);
+            Debug.LogWarning("ZombieAI: NavMeshAgent tidak siap untuk bergerak!");
+            return;
+        }
+
+        // Perintahkan NavMesh untuk berjalan ke posisi player
+        agent.isStopped = false;
+        agent.stoppingDistance = stoppingDistance;
+        agent.SetDestination(playerTarget.position);
+
+        // Atur parameter animasi
+        if (anim != null)
+        {
+            anim.SetBool("isWalking", true);
+            anim.SetBool("isAttacking", false);
+        }
+
+        Debug.Log("Zombie mengejar player. Jarak: " + Vector3.Distance(transform.position, playerTarget.position));
+    }
+
+    void StopZombie()
+    {
+        if (agent == null || !agent.enabled) return;
+
+        // Hentikan pergerakan NavMesh
+        agent.isStopped = true;
+        agent.velocity = Vector3.zero;
+
+        // Matikan animasi jalan
+        if (anim != null)
+        {
+            anim.SetBool("isWalking", false);
         }
     }
 
-    void Mati(GameObject peluru)
+    void TriggerAttack()
     {
-        sudahMati = true;
-        Debug.Log("Zombie tewas!");
+        // Nyalakan animasi menyerang
+        if (anim != null)
+        {
+            anim.SetBool("isAttacking", true);
+        }
 
-        // 1. Jalankan animasi mati lewat parameter trigger 'die'
-        if (anim != null) anim.SetTrigger("die");
-
-        // 2. Matikan NavMeshAgent agar mayat zombie tidak ngejar player lagi secara gaib
-        if (agent != null) agent.isStopped = true;
-
-        Destroy(peluru); // Hancurkan peluru
-
-        // 3. JANGAN langsung Destroy(gameObject). Kasih jeda 3 detik agar dosen bisa melihat animasi jatuh matinya selesai!
-        Destroy(gameObject, 3f); 
+        Debug.Log("Zombie menyerang!");
     }
 }
