@@ -4,12 +4,35 @@ using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour
 {
     [Header("Pengaturan UI & Objek")]
-    public GameObject uiStartGame;        // Seret Canvas Start Game ke sini (Tutorial)
-    public GameObject mainmenuAI;         // Seret Main Menu panel untuk transisi level
+    public GameObject uiStartGame;        // Seret UI Start Menu ke sini (tampilan sebelum game mulai)
+    public GameObject mainmenuAI;         // Seret Main Menu panel ke sini (tampilan setelah semua zombie mati)
 
     [Header("Status Game")]
     private bool gameSudahMulai = false;
     private bool semuaZombieMati = false;
+    private int zombieCount = 0;
+
+    void OnEnable()
+    {
+        GameEvents.OnZombieDied += HandleZombieDeath;
+    }
+
+    void OnDisable()
+    {
+        GameEvents.OnZombieDied -= HandleZombieDeath;
+    }
+
+    void Start()
+    {
+        // Ensure the end-level menu is hidden until all zombies are killed.
+        if (mainmenuAI != null)
+        {
+            mainmenuAI.SetActive(false);
+        }
+
+        zombieCount = CountZombies();
+        UnityEngine.Debug.Log("Initial zombie count: " + zombieCount);
+    }
 
     // FUNGSI 1: Dipanggil saat tombol START GAME ditekan
     public void TekanStartGame()
@@ -24,32 +47,33 @@ public class GameManager : MonoBehaviour
         GameEvents.RaiseStartGame();
     }
 
-    void Update()
+    private int CountZombies()
     {
-        // Jika game belum mulai, atau jika semua zombie sudah terdeteksi mati, stop update
+        return GameObject.FindGameObjectsWithTag("Zombie").Length;
+    }
+
+    private void HandleZombieDeath()
+    {
         if (!gameSudahMulai || semuaZombieMati) return;
 
-        // Hitung jumlah zombie aktif bertag "Zombie" di map
-        GameObject[] daftarZombie = GameObject.FindGameObjectsWithTag("Zombie");
+        zombieCount = Mathf.Max(0, zombieCount - 1);
+        UnityEngine.Debug.Log("Zombie died. Remaining count: " + zombieCount);
 
-        // Jika semua zombie sudah habis terbunuh
-        if (daftarZombie.Length == 0)
+        if (zombieCount == 0)
         {
-            MunculkanMainMenuLevel();
+            ShowMainMenuLevel();
         }
     }
 
-    void MunculkanMainMenuLevel()
+    void ShowMainMenuLevel()
     {
         semuaZombieMati = true;
-        Debug.Log("Zombie Habis! Tampilkan Main Menu untuk transisi level.");
+        UnityEngine.Debug.Log("All zombies are dead! Showing main menu UI for next transition.");
 
-        // Show main menu panel so player can click to proceed
         if (mainmenuAI != null)
         {
             mainmenuAI.SetActive(true);
         }
-        // Notify that level objectives are completed
         GameEvents.RaiseTutorialCompleted();
     }
 

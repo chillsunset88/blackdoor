@@ -6,6 +6,9 @@ public class ZombieAI : MonoBehaviour
     private NavMeshAgent agent;
     private Transform player;
     
+    [Header("Movement")]
+    public float moveSpeed = 3.5f;
+
     [HideInInspector]
     public bool zombieAktif = false; 
 
@@ -22,12 +25,22 @@ public class ZombieAI : MonoBehaviour
     private void ActivateZombie()
     {
         zombieAktif = true;
-        Debug.Log(gameObject.name + " activated by start event!");
+        if (agent != null)
+        {
+            agent.speed = moveSpeed;
+        }
+        Debug.Log(gameObject.name + " activated by start event! speed=" + moveSpeed);
     }
 
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
+
+        if (agent != null)
+        {
+            // initialize with configured speed
+            agent.speed = moveSpeed;
+        }
 
         // PERBAIKAN: Cara mencari dan mengikat komponen transform Player yang benar
         GameObject playerObjek = GameObject.FindGameObjectWithTag("Player");

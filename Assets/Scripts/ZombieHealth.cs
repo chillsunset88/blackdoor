@@ -29,6 +29,9 @@ public class ZombieHealth : MonoBehaviour
     {
         Debug.Log("Zombie Mati!");
 
+        // Notify the game manager that one zombie has died.
+        GameEvents.RaiseZombieDied();
+
         // Hentikan gerakan dan collision agar zombie tidak terus bergerak/menerima damage.
         NavMeshAgent agent = GetComponent<NavMeshAgent>();
         if (agent != null)

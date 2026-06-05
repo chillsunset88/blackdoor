@@ -7,10 +7,12 @@ public static class GameEvents
     public static event Action OnLevelCompleted;
     public static event Action OnPlayerWon;
     public static event Action OnPlayerDied;
+    public static event Action OnZombieDied;
 
     public static void RaiseStartGame() => OnStartGame?.Invoke();
     public static void RaiseTutorialCompleted() => OnTutorialCompleted?.Invoke();
     public static void RaiseLevelCompleted() => OnLevelCompleted?.Invoke();
     public static void RaisePlayerWon() => OnPlayerWon?.Invoke();
     public static void RaisePlayerDied() => OnPlayerDied?.Invoke();
+    public static void RaiseZombieDied() => OnZombieDied?.Invoke();
 }

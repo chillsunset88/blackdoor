@@ -9,10 +9,19 @@ public class RemoteInteractor : MonoBehaviour
     public void TryActivate(GameObject target)
     {
         if (target == null) return;
+        // Support both legacy MonitorActivator and the new UIScreenActivator
+        var screen = target.GetComponent<UIScreenActivator>();
+        if (screen != null)
+        {
+            screen.Activate();
+            return;
+        }
+
         var monitor = target.GetComponent<MonitorActivator>();
         if (monitor != null)
         {
             monitor.Activate();
+            return;
         }
     }
 }

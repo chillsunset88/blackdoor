@@ -7,11 +7,12 @@ TagManager:
   - Zombie
   - Bullet
   - Weapon
+  - Remote
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Bullet
   - Water
   - UI
   - Weapon
