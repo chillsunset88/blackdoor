@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4603650724454726173}
   - component: {fileID: 6988364918651726719}
   - component: {fileID: 1443262914589065040}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: BulletLite_01_2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -101,7 +101,7 @@ GameObject:
   - component: {fileID: 5301320226799411071}
   - component: {fileID: 1458599376233093412}
   - component: {fileID: 1126770915774088132}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: BulletLite_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -192,7 +192,7 @@ GameObject:
   - component: {fileID: 4406794242827163732}
   - component: {fileID: 6701766536150726710}
   - component: {fileID: 874582930169710453}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: BulletLite_01
   m_TagString: Bullet
   m_Icon: {fileID: 0}
@@ -240,9 +240,9 @@ Rigidbody:
   m_ImplicitTensor: 1
   m_UseGravity: 0
   m_IsKinematic: 0
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 2
 --- !u!136 &6701766536150726710
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -258,7 +258,7 @@ CapsuleCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2

@@ -4,8 +4,8 @@ using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour
 {
     [Header("Pengaturan UI & Objek")]
-    public GameObject uiStartGame;       // Seret Canvas Start Game ke sini
-    public GameObject komputerPrimitive; // Seret objek Cube Komputer_Fisik ke sini
+    public GameObject uiStartGame;        // Seret Canvas Start Game ke sini (Tutorial)
+    public GameObject mainmenuAI;         // Seret Main Menu panel untuk transisi level
 
     [Header("Status Game")]
     private bool gameSudahMulai = false;
@@ -35,27 +35,32 @@ public class GameManager : MonoBehaviour
         // Jika semua zombie sudah habis terbunuh
         if (daftarZombie.Length == 0)
         {
-            MunculkanKomputerLevel2();
+            MunculkanMainMenuLevel();
         }
     }
 
-    void MunculkanKomputerLevel2()
+    void MunculkanMainMenuLevel()
     {
         semuaZombieMati = true;
-        Debug.Log("Zombie Habis! Menyalakan komputer di luar ruangan.");
+        Debug.Log("Zombie Habis! Tampilkan Main Menu untuk transisi level.");
 
-        // Otomatis memunculkan objek Cube beserta Canvas komputer di luar ruangan
-        if (komputerPrimitive != null)
+        // Show main menu panel so player can click to proceed
+        if (mainmenuAI != null)
         {
-            komputerPrimitive.SetActive(true);
+            mainmenuAI.SetActive(true);
         }
-        // Notify that tutorial/first-level objectives are completed
+        // Notify that level objectives are completed
         GameEvents.RaiseTutorialCompleted();
     }
 
-    // FUNGSI 2: Dipanggil saat tombol di Komputer Primitive ditekan lewat laser VR
+    // FUNGSI 2: Dipanggil saat tombol di Main Menu ditekan untuk pindah level
     public void PindahKeLevel2()
     {
+        // Hide main menu before transitioning
+        if (mainmenuAI != null)
+        {
+            mainmenuAI.SetActive(false);
+        }
         // Ganti nama di dalam tanda petik sesuai nama scene level 2 kamu yang asli
         SceneManager.LoadScene("Level2"); 
     }

@@ -46,7 +46,7 @@ public class Pistol : MonoBehaviour
         }
 
         // Jalankan tembakan jika peluru masih ada
-        GameObject spawnedBullet = Instantiate(bulletPrefab, spawnPoint.position, spawnPoint.rotation);
+        GameObject spawnedBullet = BulletPool.Instance.Get(bulletPrefab, spawnPoint.position, spawnPoint.rotation);
         Bullet bulletScript = spawnedBullet.GetComponent<Bullet>();
         if (bulletScript == null)
         {
@@ -66,8 +66,7 @@ public class Pistol : MonoBehaviour
         {
             Debug.LogWarning("Spawned bullet prefab does not have Rigidbody: " + spawnedBullet.name);
         }
-
-        Destroy(spawnedBullet, 3f);
+        
 
         if (audioSource != null && audioSource.clip != null)
         {

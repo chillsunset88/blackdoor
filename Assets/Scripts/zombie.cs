@@ -64,24 +64,17 @@ public class ZombieAI : MonoBehaviour
     // Sambungan script ZombieAI di atas...
     private void OnCollisionEnter(Collision collision)
     {
-        // Pengecekan 1: Deteksi berdasarkan TAG peluru
-        if (collision.gameObject.CompareTag("Bullet"))
+        // Previously this method destroyed the zombie directly when a bullet collided.
+        // Damage and death are now handled by `ZombieHealth`, so ignore bullet collisions here
+        // to avoid double-destroy and duplicate logs.
+        if (collision.gameObject.CompareTag("Bullet") ||
+            collision.gameObject.name.Contains("Bullet") ||
+            collision.gameObject.name.Contains("peluru"))
         {
-            Mati(collision.gameObject);
+            // Let Bullet.cs and ZombieHealth handle the damage and destruction.
             return;
         }
 
-        // Pengecekan 2: Jalur alternatif jika pelurumu menggunakan nama objek "Bullet"
-        if (collision.gameObject.name.Contains("Bullet") || collision.gameObject.name.Contains("peluru"))
-        {
-            Mati(collision.gameObject);
-        }
-    }
-
-    void Mati(GameObject peluru)
-    {
-        Debug.Log("Zombie tewas terkena peluru!");
-        Destroy(peluru); // Hancurkan peluru
-        Destroy(gameObject); // Hancurkan zombie ini
+        // Other collision handling (e.g., player contact) can go here.
     }
 }

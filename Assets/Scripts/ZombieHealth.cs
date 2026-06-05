@@ -33,7 +33,11 @@ public class ZombieHealth : MonoBehaviour
         NavMeshAgent agent = GetComponent<NavMeshAgent>();
         if (agent != null)
         {
-            agent.isStopped = true;
+            // Only stop the agent if it's placed on a NavMesh to avoid errors.
+            if (agent.isOnNavMesh)
+            {
+                agent.isStopped = true;
+            }
             agent.enabled = false;
         }
 
@@ -46,11 +50,21 @@ public class ZombieHealth : MonoBehaviour
         Animator anim = GetComponent<Animator>();
         if (anim != null)
         {
-            anim.SetBool("die", true);
-            anim.SetBool("isDead", true);
+            // Set animation parameters only if they exist to avoid warnings.
+            if (HasAnimatorParameter(anim, "die")) anim.SetBool("die", true);
+            if (HasAnimatorParameter(anim, "isDead")) anim.SetBool("isDead", true);
         }
 
         Destroy(gameObject, 2f);
+    }
+
+    private bool HasAnimatorParameter(Animator animator, string paramName)
+    {
+        foreach (var p in animator.parameters)
+        {
+            if (p.name == paramName) return true;
+        }
+        return false;
     }
 
     public float GetHealthPercentage()
