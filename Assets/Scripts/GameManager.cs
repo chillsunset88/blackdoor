@@ -19,14 +19,9 @@ public class GameManager : MonoBehaviour
         // 1. Sembunyikan papan UI Start Game agar tidak menghalangi ruangan
         if (uiStartGame != null) uiStartGame.SetActive(false);
 
-        // 2. Cari semua zombie di map dan perintahkan mereka untuk mulai berjalan
-        ZombieAI[] semuaZombie = FindObjectsOfType<ZombieAI>();
-        foreach (ZombieAI zombie in semuaZombie)
-        {
-            zombie.zombieAktif = true;
-        }
-
-        Debug.Log("Game Dimulai! Zombie bergerak mengejar player.");
+        // 2. Broadcast start event so interested systems (zombies, UI) can react
+        UnityEngine.Debug.Log("Game Dimulai! Broadcasting start event.");
+        GameEvents.RaiseStartGame();
     }
 
     void Update()
@@ -54,6 +49,8 @@ public class GameManager : MonoBehaviour
         {
             komputerPrimitive.SetActive(true);
         }
+        // Notify that tutorial/first-level objectives are completed
+        GameEvents.RaiseTutorialCompleted();
     }
 
     // FUNGSI 2: Dipanggil saat tombol di Komputer Primitive ditekan lewat laser VR
