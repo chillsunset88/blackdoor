@@ -5,12 +5,15 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/VR scene.unity
     guid: 0e436ea2df8aec14486790c8c98e3b12
   - enabled: 1
+    path: Assets/Scenes/traininggrounds.unity
+    guid: 6a7953c8142d4404ab7990fbe40bf4fa
+  - enabled: 1
     path: Assets/Scenes/level2.unity
-    guid: ff89e096351205245beceb9a352dba2b
+    guid: e903bd9dfeb83aa48bd38992ee340dca
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: fa2f949ad9ddde9468eb98285272f93b, type: 2}

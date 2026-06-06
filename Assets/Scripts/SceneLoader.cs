@@ -8,4 +8,10 @@ public class SceneLoader : MonoBehaviour
         // Ganti "Level2" dengan nama Scene map laboratorium kamu yang sebenarnya
         SceneManager.LoadScene("level2"); 
     }
+
+    public void LoadTutorial()
+    {
+        // Ganti "TutorialSceneName" dengan nama Scene tutorial/TrainingGround kamu yang sebenarnya
+        SceneManager.LoadScene("traininggrounds");
+    }
 }
