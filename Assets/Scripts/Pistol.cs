@@ -21,8 +21,7 @@ public class Pistol : MonoBehaviour
     {
         grabInteractable = GetComponent<UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable>();
         audioSource = GetComponent<AudioSource>();
-        
-        // Mengisi peluru penuh saat game pertama kali dimulai
+
         currentAmmo = maxAmmo;
 
         grabInteractable.activated.AddListener(Shoot);

@@ -5,12 +5,13 @@ public class ZombieAI : MonoBehaviour
 {
     private NavMeshAgent agent;
     private Transform player;
-    
+    private Animator anim; // TAMBAH INI
+
     [Header("Movement")]
     public float moveSpeed = 3.5f;
 
     [HideInInspector]
-    public bool zombieAktif = false; 
+    public bool zombieAktif = false;
 
     void OnEnable()
     {
@@ -25,28 +26,30 @@ public class ZombieAI : MonoBehaviour
     private void ActivateZombie()
     {
         zombieAktif = true;
+
         if (agent != null)
         {
             agent.speed = moveSpeed;
         }
+
         Debug.Log(gameObject.name + " activated by start event! speed=" + moveSpeed);
     }
 
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
+        anim = GetComponent<Animator>(); // TAMBAH INI
 
         if (agent != null)
         {
-            // initialize with configured speed
             agent.speed = moveSpeed;
         }
 
-        // PERBAIKAN: Cara mencari dan mengikat komponen transform Player yang benar
         GameObject playerObjek = GameObject.FindGameObjectWithTag("Player");
+
         if (playerObjek != null)
         {
-            player = playerObjek.transform; 
+            player = playerObjek.transform;
         }
         else
         {
@@ -56,38 +59,36 @@ public class ZombieAI : MonoBehaviour
 
     void Update()
     {
-        // Jika belum ditekan START GAME, diam di tempat
         if (!zombieAktif)
         {
-            if (agent != null && agent.isOnNavMesh) agent.isStopped = true;
+            if (agent != null && agent.isOnNavMesh)
+                agent.isStopped = true;
+
+            if (anim != null)
+                anim.SetBool("isWalking", false);
+
             return;
         }
 
-        // Jika sudah aktif, kejar player
         if (agent != null && player != null && agent.isOnNavMesh)
         {
             agent.isStopped = false;
             agent.SetDestination(player.position);
+
+            if (anim != null)
+            {
+                anim.SetBool("isWalking", agent.velocity.magnitude > 0.1f);
+            }
         }
     }
 
-    // (Fungsi OnCollisionEnter ada di bawah di bagian Perbaikan 2)
-
-
-    // Sambungan script ZombieAI di atas...
     private void OnCollisionEnter(Collision collision)
     {
-        // Previously this method destroyed the zombie directly when a bullet collided.
-        // Damage and death are now handled by `ZombieHealth`, so ignore bullet collisions here
-        // to avoid double-destroy and duplicate logs.
         if (collision.gameObject.CompareTag("Bullet") ||
             collision.gameObject.name.Contains("Bullet") ||
             collision.gameObject.name.Contains("peluru"))
         {
-            // Let Bullet.cs and ZombieHealth handle the damage and destruction.
             return;
         }
-
-        // Other collision handling (e.g., player contact) can go here.
     }
 }
